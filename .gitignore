@@ -1,0 +1,8 @@
+# Environment variables
+.env
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
