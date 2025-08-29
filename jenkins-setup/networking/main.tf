@@ -5,7 +5,7 @@ variable "cidr_public_subnet" {}
 variable "us_availability_zone" {}
 variable "cidr_private_subnet" {}
 
-output "dev_proj_1_vpc_id" {
+output "pydevops_proj_1_vpc_id" {
   value = aws_vpc.pydevops_proj_1_vpc_us_east_1.id
 }
 
