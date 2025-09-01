@@ -25,3 +25,12 @@ module "jenkins" {
   enable_public_ip_address  = true
   user_data_install_jenkins = templatefile("./jenkins-runner-script/jenkins-installer.sh", {})
 }
+
+module "lb_target_group" {
+  source                   = "./load-balancer-target-group"
+  lb_target_group_name     = "jenkins-lb-target-group"
+  lb_target_group_port     = 8080
+  lb_target_group_protocol = "HTTP"
+  vpc_id                   = module.networking.pydevops_proj_1_vpc_id # This value is comming from output on networking/main.tf file
+  ec2_instance_id          = module.jenkins.jenkins_ec2_instance # This value is comming from output on jenkins/main.tf file
+}
