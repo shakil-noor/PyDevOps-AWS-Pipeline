@@ -34,3 +34,36 @@ module "lb_target_group" {
   vpc_id                   = module.networking.pydevops_proj_1_vpc_id # This value is comming from output on networking/main.tf file
   ec2_instance_id          = module.jenkins.jenkins_ec2_instance # This value is comming from output on jenkins/main.tf file
 }
+
+module "alb" {
+  source                    = "./load-balancer"
+  lb_name                   = "pydevops-proj-1-alb"
+  is_external               = false
+  lb_type                   = "application"
+  sg_enable_ssh_https       = module.security_group.sg_ec2_sg_ssh_http_id
+  subnet_ids                = tolist(module.networking.pydevops_proj_1_public_subnets)
+  tag_name                  = "pydevops-proj-1-alb"
+  lb_target_group_arn       = module.lb_target_group.pydevops_proj_1_lb_target_group_arn
+  ec2_instance_id           = module.jenkins.jenkins_ec2_instance_ip
+  lb_listner_port           = 80
+  lb_listner_protocol       = "HTTP"
+  lb_listner_default_action = "forward"
+  lb_https_listner_port     = 443
+  lb_https_listner_protocol = "HTTPS"
+  pydevops_proj_1_acm_arn        = module.aws_ceritification_manager.pydevops_proj_1_acm_arn
+  lb_target_group_attachment_port = 8080
+}
+
+# Create a hosted zone first and then run this
+module "hosted_zone" {
+  source          = "./hosted-zone"
+  domain_name     = "jenkins.mysite.com"
+  aws_lb_dns_name = module.alb.aws_lb_dns_name
+  aws_lb_zone_id  = module.alb.aws_lb_zone_id
+}
+
+module "aws_ceritification_manager" {
+  source         = "./certificate-manager"
+  domain_name    = "jenkins.mysite.com"
+  hosted_zone_id = module.hosted_zone.hosted_zone_id
+}
